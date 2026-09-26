@@ -1,0 +1,16 @@
+fastapi
+uvicorn[standard]
+python-multipart
+python-dotenv
+pydantic-settings
+
+pymupdf
+
+google-genai
+
+pinecone
+
+llama-index
+llama-index-vector-stores-pinecone
+
+pymongo
