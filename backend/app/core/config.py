@@ -5,7 +5,7 @@ class Settings(BaseSettings):
     GEMINI_API_KEY: str
     GEMINI_EMBEDDING_MODEL: str = "gemini-embedding-001"
     GEMINI_EMBEDDING_DIMENSION: int = 768
-    GEMINI_LLM_MODEL: str = "gemini-2.0-flash"
+    GEMINI_LLM_MODEL: str = "gemini-3-flash-preview"
 
 
     PINECONE_API_KEY: str
@@ -14,8 +14,12 @@ class Settings(BaseSettings):
     CHUNK_SIZE: int = 800
     CHUNK_OVERLAP: int = 120
 
-    MONGODB_URI: str  | None = None
-    MONGODB_DATABASE: str = "medical_rag"
+    MONGO_URI: str  | None = None
+    MONGO_DB_NAME: str = "medical_rag"
+
+    JWT_SECRET_KEY: str
+    JWT_ALGORITHM: str = "HS256"
+    JWT_EXPIRE_MINUTES: int = 60
 
     model_config = SettingsConfigDict(
         env_file=".env",
