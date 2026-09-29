@@ -81,6 +81,7 @@ Content:
                     match.score,
                     4,
                 ),
+                "text": text,
             }
         )
 

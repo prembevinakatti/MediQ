@@ -18,6 +18,7 @@ import {
   HeartPulse,
   FileSpreadsheet,
 } from "lucide-react";
+import { ExpandableSources } from "./ExpandableSources";
 
 interface ChatAreaProps {
   messages: MessageItem[];
@@ -320,39 +321,12 @@ export function ChatArea({
                     />
                   )}
 
-                  {/* Sources Bar */}
+                  {/* Expandable Sources Bar */}
                   {!isUser && msg.sources && msg.sources.length > 0 && (
-                    <div className="mt-4 pt-3 border-t border-slate-100">
-                      <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-2 flex items-center gap-1">
-                        <BookOpen className="h-3 w-3 text-sky-700" />
-                        Corroborated Literature Sources ({msg.sources.length})
-                      </p>
-                      <div className="flex flex-wrap gap-2">
-                        {msg.sources.map((src) => {
-                          const percent = Math.round((src.score || 0) * 100);
-                          return (
-                            <button
-                              key={src.id}
-                              onClick={() => onSelectSource(src)}
-                              className="group flex items-center gap-1.5 rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1 text-[11px] font-medium text-slate-700 hover:border-sky-300 hover:bg-sky-50 transition shadow-2xs"
-                            >
-                              <span className="font-bold text-sky-800">
-                                Ref #{src.id}
-                              </span>
-                              <span className="max-w-[150px] truncate text-slate-700">
-                                {src.document}
-                              </span>
-                              <span className="rounded bg-white px-1 py-0.2 text-[9px] text-slate-600 border border-slate-200 font-medium">
-                                p.{src.page}
-                              </span>
-                              <span className="text-[10px] font-bold text-emerald-700">
-                                {percent}%
-                              </span>
-                            </button>
-                          );
-                        })}
-                      </div>
-                    </div>
+                    <ExpandableSources
+                      sources={msg.sources}
+                      onSelectSource={onSelectSource}
+                    />
                   )}
                 </div>
               </div>
