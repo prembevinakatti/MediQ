@@ -104,7 +104,7 @@ export function AuthModal({ isOpen, onClose, canDismiss = false }: AuthModalProp
           </p>
         </div>
 
-  
+
 
         {/* Tab Switcher */}
         <div className="grid grid-cols-2 rounded-xl bg-slate-100 p-1 mb-5 border border-slate-200">
@@ -114,11 +114,10 @@ export function AuthModal({ isOpen, onClose, canDismiss = false }: AuthModalProp
               setIsRegister(false);
               setError(null);
             }}
-            className={`py-2 text-xs font-bold rounded-lg transition ${
-              !isRegister
+            className={`py-2 text-xs font-bold rounded-lg transition ${!isRegister
                 ? "bg-white text-slate-900 shadow-2xs"
                 : "text-slate-500 hover:text-slate-900"
-            }`}
+              }`}
           >
             Sign In
           </button>
@@ -128,11 +127,10 @@ export function AuthModal({ isOpen, onClose, canDismiss = false }: AuthModalProp
               setIsRegister(true);
               setError(null);
             }}
-            className={`py-2 text-xs font-bold rounded-lg transition ${
-              isRegister
+            className={`py-2 text-xs font-bold rounded-lg transition ${isRegister
                 ? "bg-white text-slate-900 shadow-2xs"
                 : "text-slate-500 hover:text-slate-900"
-            }`}
+              }`}
           >
             Register Practitioner
           </button>
@@ -151,7 +149,7 @@ export function AuthModal({ isOpen, onClose, canDismiss = false }: AuthModalProp
           {isRegister && (
             <div>
               <label className="block text-xs font-bold text-slate-700 mb-1">
-                Practitioner Name & Credential
+                Name
               </label>
               <div className="relative">
                 <UserIcon className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
@@ -169,7 +167,7 @@ export function AuthModal({ isOpen, onClose, canDismiss = false }: AuthModalProp
 
           <div>
             <label className="block text-xs font-bold text-slate-700 mb-1">
-              Institutional Email
+              Email
             </label>
             <div className="relative">
               <Mail className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
@@ -186,7 +184,7 @@ export function AuthModal({ isOpen, onClose, canDismiss = false }: AuthModalProp
 
           <div>
             <label className="block text-xs font-bold text-slate-700 mb-1">
-              Portal Password
+              Password
             </label>
             <div className="relative">
               <Lock className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
