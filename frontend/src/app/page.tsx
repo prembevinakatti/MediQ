@@ -283,10 +283,7 @@ function MediQApp() {
             
             {/* Left Side: About the Project */}
             <div className="lg:col-span-6 space-y-6 text-left">
-              <div className="inline-flex items-center gap-2 rounded-full border border-sky-200 bg-sky-50 px-3 py-1 text-xs font-semibold text-sky-700">
-                <ShieldCheck className="h-4 w-4 text-sky-600" />
-                <span>Clinical Decision Support System</span>
-              </div>
+              
 
               <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-slate-900 leading-tight">
                 Evidence-based clinical intelligence for healthcare teams.
