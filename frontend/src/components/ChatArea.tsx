@@ -4,8 +4,6 @@ import React, { useState, useRef, useEffect } from "react";
 import { MessageItem, SourceCitation } from "@/lib/api";
 import {
   Send,
-  Sparkles,
-  Bot,
   User,
   Copy,
   Check,
@@ -34,27 +32,27 @@ interface ChatAreaProps {
 const CLINICAL_CATEGORIES = [
   {
     icon: Pill,
-    title: "Pharmacology & Dosage",
-    desc: "Renal adjustments, drug-drug interactions, contraindications",
-    prompt: "What are the renal dosage adjustments and contraindications for Metformin in patients with CKD?",
+    title: "Pharmacotherapy & Renal Titration",
+    desc: "Renal dose adjustments, drug-drug contraindications, and clearance cutoffs",
+    prompt: "What are the renal dosage adjustments, eGFR thresholds, and contraindications for Metformin in patients with Chronic Kidney Disease?",
   },
   {
     icon: HeartPulse,
-    title: "Diagnostic Differential",
-    desc: "Symptom presentation, diagnostic criteria, lab biomarkers",
+    title: "Diagnostic Criteria & Biomarkers",
+    desc: "Symptom constellations, diagnostic algorithm steps, and lab biomarker cutoffs",
     prompt: "What are the clinical diagnostic criteria and biomarker thresholds for Acute Coronary Syndrome?",
   },
   {
     icon: FileSpreadsheet,
-    title: "Institutional Guidelines",
-    desc: "Summaries from hospital protocols and indexed textbooks",
-    prompt: "Summarize the primary clinical management recommendations from the uploaded hospital guidelines.",
+    title: "Institutional Care Pathways",
+    desc: "Recommendations from indexed hospital guidelines and clinical trial literature",
+    prompt: "Summarize the primary clinical management recommendations and care pathways from the uploaded hospital guidelines.",
   },
   {
     icon: Stethoscope,
-    title: "Adverse Events & Safety",
-    desc: "Monitoring parameters, toxicity profiles, tapering regimens",
-    prompt: "Detail the primary adverse event profile and monitoring parameters for long-term systemic corticosteroid therapy.",
+    title: "Safety Alerts & Adverse Events",
+    desc: "Monitoring parameters, black-box warnings, and toxicity management",
+    prompt: "Detail the primary adverse event profile, required baseline lab checks, and monitoring parameters for long-term systemic corticosteroid therapy.",
   },
 ];
 
@@ -109,19 +107,19 @@ export function ChatArea({
       ? conversationTitle
       : messages.length > 0 && messages[0].role === "user"
       ? messages[0].content.slice(0, 45)
-      : "Clinical Case Consultation";
+      : "Clinical Consultation";
 
   return (
     <div className="flex-1 flex flex-col h-full overflow-hidden bg-slate-50/50">
       {/* Top Bar / Clinical Session Header */}
       <div className="flex items-center justify-between border-b border-slate-200 bg-white px-6 py-3">
         <div className="flex items-center gap-2.5">
-          <span className="flex h-2 w-2 rounded-full bg-emerald-500" />
+          <span className="flex h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
           <span className="text-xs font-bold text-slate-800">
             {displayTitle}
           </span>
-          <span className="rounded bg-sky-50 px-2 py-0.5 text-[10px] font-semibold text-sky-700 border border-sky-200">
-            Literature Grounded
+          <span className="rounded bg-sky-50 px-2 py-0.5 text-[10px] font-semibold text-sky-800 border border-sky-200">
+            Evidence-Grounded
           </span>
         </div>
 
@@ -130,37 +128,41 @@ export function ChatArea({
             onClick={() => setShowSettings(!showSettings)}
             className={`flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-semibold transition border ${
               showSettings
-                ? "bg-sky-50 text-sky-700 border-sky-200"
+                ? "bg-sky-50 text-sky-800 border-sky-200"
                 : "bg-white text-slate-600 border-slate-200 hover:text-slate-900"
             }`}
           >
-            <SlidersHorizontal className="h-3.5 w-3.5 text-sky-600" />
-            <span>Retrieval Depth: {topK} Chunks</span>
+            <SlidersHorizontal className="h-3.5 w-3.5 text-sky-700" />
+            <span>Evidence Breadth: {topK} References</span>
           </button>
         </div>
       </div>
 
-      {/* Top-K Selector Bar */}
+      {/* Retrieval Depth Bar */}
       {showSettings && (
         <div className="border-b border-slate-200 bg-white px-6 py-2.5 flex items-center justify-between text-xs text-slate-600 shadow-2xs">
           <div className="flex items-center gap-2">
-            <span className="font-semibold text-slate-700">Pinecone Context Chunks:</span>
-            {[3, 5, 8].map((k) => (
+            <span className="font-semibold text-slate-700">Reference Breadth:</span>
+            {[
+              { val: 3, label: "3 (Focused)" },
+              { val: 5, label: "5 (Standard)" },
+              { val: 8, label: "8 (Comprehensive)" },
+            ].map(({ val, label }) => (
               <button
-                key={k}
-                onClick={() => setTopK(k)}
+                key={val}
+                onClick={() => setTopK(val)}
                 className={`rounded-md px-2.5 py-1 text-xs font-semibold transition ${
-                  topK === k
-                    ? "bg-sky-600 text-white shadow-2xs"
+                  topK === val
+                    ? "bg-sky-700 text-white shadow-2xs"
                     : "bg-slate-100 text-slate-600 hover:bg-slate-200"
                 }`}
               >
-                {k} Sources
+                {label}
               </button>
             ))}
           </div>
           <span className="text-[11px] text-slate-500">
-            Higher values query more document segments from Pinecone.
+            Sets the number of verified literature passages incorporated into synthesis.
           </span>
         </div>
       )}
@@ -170,34 +172,34 @@ export function ChatArea({
         {messages.length === 0 ? (
           <div className="max-w-3xl mx-auto py-8 flex flex-col items-center text-center">
             {/* Clinical Badge */}
-            <div className="inline-flex items-center gap-1.5 rounded-full bg-sky-50 border border-sky-200 px-3.5 py-1 text-xs font-semibold text-sky-700 mb-4">
-              <ShieldCheck className="h-4 w-4 text-sky-600" />
+            <div className="inline-flex items-center gap-1.5 rounded-full bg-sky-50 border border-sky-200 px-3.5 py-1 text-xs font-semibold text-sky-800 mb-4">
+              <ShieldCheck className="h-4 w-4 text-sky-700" />
               <span>Evidence-Based Clinical Decision Support</span>
             </div>
 
             <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
-              Medical Literature & Clinical Protocol Copilot
+              Clinical Reference & Protocol Copilot
             </h1>
 
             <p className="mt-2 text-xs sm:text-sm text-slate-600 max-w-xl leading-relaxed">
-              Formulate clinical, pharmacological, or diagnostic questions. MediQ retrieves
-              corroborating literature from your indexed documents and provides citation-backed guidance.
+              Inquire regarding pharmacology, clinical pathways, dosing criteria, or differential diagnosis.
+              MediQ corroborates answers against verified institutional literature with page-specific citations.
             </p>
 
             {/* Document Warning if empty */}
             {!hasDocuments && (
               <div className="mt-6 flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 p-4 text-left max-w-xl shadow-2xs">
-                <FileQuestion className="h-5 w-5 text-amber-600 shrink-0 mt-0.5" />
+                <FileQuestion className="h-5 w-5 text-amber-700 shrink-0 mt-0.5" />
                 <div className="text-xs">
                   <p className="font-bold text-amber-900">
-                    No clinical reference documents found
+                    No clinical literature indexed
                   </p>
-                  <p className="text-amber-700 mt-0.5">
-                    Upload medical textbooks, clinical study PDFs, or institutional guidelines in the Document Library to enable grounded retrieval.
+                  <p className="text-amber-800 mt-0.5">
+                    Upload medical practice guidelines, hospital formularies, or clinical study PDFs to enable evidence-grounded consultations.
                   </p>
                   <button
                     onClick={onNavigateToDocs}
-                    className="mt-2 font-bold text-sky-700 flex items-center gap-1 hover:underline"
+                    className="mt-2 font-bold text-sky-800 flex items-center gap-1 hover:underline"
                   >
                     Open Document Library <ExternalLink className="h-3 w-3" />
                   </button>
@@ -208,8 +210,8 @@ export function ChatArea({
             {/* Clinical Inquiry Cards */}
             <div className="w-full mt-8 text-left">
               <p className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-3 flex items-center gap-1.5">
-                <Search className="h-3.5 w-3.5 text-sky-600" />
-                Sample Clinical Inquiries
+                <Search className="h-3.5 w-3.5 text-sky-700" />
+                Select Clinical Inquiry Template
               </p>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {CLINICAL_CATEGORIES.map((cat, idx) => {
@@ -222,7 +224,7 @@ export function ChatArea({
                     >
                       <div>
                         <div className="flex items-center gap-2 mb-1.5">
-                          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-sky-50 text-sky-600 border border-sky-100 group-hover:bg-sky-600 group-hover:text-white transition">
+                          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-sky-50 text-sky-700 border border-sky-100 group-hover:bg-sky-700 group-hover:text-white transition">
                             <Icon className="h-4 w-4" />
                           </div>
                           <span className="text-xs font-bold text-slate-900">
@@ -233,7 +235,7 @@ export function ChatArea({
                           {cat.desc}
                         </p>
                       </div>
-                      <span className="mt-3 text-[10px] font-semibold text-sky-600 flex items-center gap-1">
+                      <span className="mt-3 text-[10px] font-semibold text-sky-700 flex items-center gap-1">
                         Use inquiry template &rarr;
                       </span>
                     </button>
@@ -257,7 +259,7 @@ export function ChatArea({
                   className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-xs font-bold shadow-2xs ${
                     isUser
                       ? "bg-slate-800 text-white"
-                      : "bg-sky-600 text-white"
+                      : "bg-sky-700 text-white"
                   }`}
                 >
                   {isUser ? <User className="h-4 w-4" /> : <Stethoscope className="h-4 w-4" />}
@@ -267,21 +269,21 @@ export function ChatArea({
                 <div
                   className={`rounded-2xl p-4 sm:p-5 shadow-xs ${
                     isUser
-                      ? "bg-sky-700 text-white rounded-tr-xs"
-                      : "border border-slate-200 bg-white text-slate-800 rounded-tl-xs"
+                      ? "bg-sky-800 text-white rounded-tr-xs"
+                      : "border border-slate-200 bg-white text-slate-900 rounded-tl-xs"
                   }`}
                 >
                   {/* Assistant Header */}
                   {!isUser && (
                     <div className="flex items-center justify-between mb-3 border-b border-slate-100 pb-2 text-[11px]">
                       <div className="flex items-center gap-2">
-                        <span className="font-bold text-sky-700 flex items-center gap-1.5">
-                          <Sparkles className="h-3.5 w-3.5" />
-                          Clinical Evidence Note
+                        <span className="font-bold text-sky-800 flex items-center gap-1.5">
+                          <Stethoscope className="h-3.5 w-3.5 text-sky-700" />
+                          Clinical Evidence Synthesis
                         </span>
                         {msg.sources && msg.sources.length > 0 && (
-                          <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-semibold text-emerald-700 border border-emerald-200">
-                            {msg.sources.length} Corroborated Citations
+                          <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-semibold text-emerald-800 border border-emerald-200">
+                            {msg.sources.length} Verified References
                           </span>
                         )}
                       </div>
@@ -293,7 +295,7 @@ export function ChatArea({
                         {copiedId === (msg.id || `${index}`) ? (
                           <>
                             <Check className="h-3 w-3 text-emerald-600" />
-                            <span className="text-emerald-600">Copied</span>
+                            <span className="text-emerald-700">Copied</span>
                           </>
                         ) : (
                           <>
@@ -322,8 +324,8 @@ export function ChatArea({
                   {!isUser && msg.sources && msg.sources.length > 0 && (
                     <div className="mt-4 pt-3 border-t border-slate-100">
                       <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-2 flex items-center gap-1">
-                        <BookOpen className="h-3 w-3 text-sky-600" />
-                        Verified Literature Sources ({msg.sources.length})
+                        <BookOpen className="h-3 w-3 text-sky-700" />
+                        Corroborated Literature Sources ({msg.sources.length})
                       </p>
                       <div className="flex flex-wrap gap-2">
                         {msg.sources.map((src) => {
@@ -334,16 +336,16 @@ export function ChatArea({
                               onClick={() => onSelectSource(src)}
                               className="group flex items-center gap-1.5 rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1 text-[11px] font-medium text-slate-700 hover:border-sky-300 hover:bg-sky-50 transition shadow-2xs"
                             >
-                              <span className="font-bold text-sky-700">
+                              <span className="font-bold text-sky-800">
                                 Ref #{src.id}
                               </span>
-                              <span className="max-w-[150px] truncate text-slate-600">
+                              <span className="max-w-[150px] truncate text-slate-700">
                                 {src.document}
                               </span>
                               <span className="rounded bg-white px-1 py-0.2 text-[9px] text-slate-600 border border-slate-200 font-medium">
                                 p.{src.page}
                               </span>
-                              <span className="text-[10px] font-bold text-emerald-600">
+                              <span className="text-[10px] font-bold text-emerald-700">
                                 {percent}%
                               </span>
                             </button>
@@ -361,17 +363,17 @@ export function ChatArea({
         {/* Loading Indicator */}
         {isLoading && (
           <div className="flex gap-3 sm:gap-4 max-w-3xl mr-auto">
-            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-sky-600 text-white">
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-sky-700 text-white">
               <Stethoscope className="h-4 w-4 animate-pulse" />
             </div>
-            <div className="rounded-2xl rounded-tl-xs border border-slate-200 bg-white p-4 text-xs text-slate-600 flex items-center gap-3 shadow-xs">
+            <div className="rounded-2xl rounded-tl-xs border border-slate-200 bg-white p-4 text-xs text-slate-700 flex items-center gap-3 shadow-xs">
               <div className="flex gap-1">
-                <span className="h-2 w-2 rounded-full bg-sky-600 animate-bounce" />
-                <span className="h-2 w-2 rounded-full bg-sky-600 animate-bounce [animation-delay:0.2s]" />
-                <span className="h-2 w-2 rounded-full bg-sky-600 animate-bounce [animation-delay:0.4s]" />
+                <span className="h-2 w-2 rounded-full bg-sky-700 animate-bounce" />
+                <span className="h-2 w-2 rounded-full bg-sky-700 animate-bounce [animation-delay:0.2s]" />
+                <span className="h-2 w-2 rounded-full bg-sky-700 animate-bounce [animation-delay:0.4s]" />
               </div>
-              <span className="font-medium text-slate-600">
-                Searching Pinecone index & synthesizing clinical evidence note...
+              <span className="font-medium text-slate-700">
+                Cross-referencing clinical literature & synthesizing verified note...
               </span>
             </div>
           </div>
@@ -383,28 +385,35 @@ export function ChatArea({
       {/* Input Bar */}
       <div className="border-t border-slate-200 bg-white p-4 sm:p-5">
         <form onSubmit={handleSubmit} className="max-w-4xl mx-auto relative">
-          <div className="relative rounded-xl border border-slate-300 bg-white shadow-xs focus-within:border-sky-500 focus-within:ring-1 focus-within:ring-sky-500 transition overflow-hidden">
+          <div className="relative rounded-xl border border-slate-300 bg-white shadow-xs focus-within:border-sky-600 focus-within:ring-1 focus-within:ring-sky-600 transition overflow-hidden">
             <textarea
               rows={2}
               value={inputText}
               onChange={(e) => setInputText(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder="Enter patient symptoms, pharmacology questions, or hospital protocol query — Press Enter to send"
+              placeholder="Inquire regarding clinical guidelines, drug titration, contraindications, or treatment protocols..."
               className="w-full resize-none bg-transparent px-4 pt-3 pb-10 text-xs sm:text-sm text-slate-900 placeholder-slate-400 focus:outline-none"
             />
 
             <div className="absolute bottom-2.5 right-3 flex items-center gap-3">
               <span className="text-[10px] text-slate-400 hidden sm:inline">
-                Shift + Enter for new line
+                Enter to send • Shift + Enter for new line
               </span>
               <button
                 type="submit"
                 disabled={!inputText.trim() || isLoading}
-                className="flex h-8 w-8 items-center justify-center rounded-lg bg-sky-600 text-white shadow-2xs hover:bg-sky-700 active:scale-95 transition disabled:opacity-40"
+                className="flex h-8 w-8 items-center justify-center rounded-lg bg-sky-700 text-white shadow-2xs hover:bg-sky-800 active:scale-95 transition disabled:opacity-40"
               >
                 <Send className="h-4 w-4" />
               </button>
             </div>
+          </div>
+
+          <div className="mt-2 text-center text-[10px] text-slate-400 flex items-center justify-center gap-1">
+            <ShieldCheck className="h-3 w-3 text-slate-400" />
+            <span>
+              Clinical decision support is an adjunct to, and does not replace, licensed medical judgment.
+            </span>
           </div>
         </form>
       </div>
@@ -423,7 +432,7 @@ function FormattedMessage({
 }) {
   const lines = text.split("\n");
   return (
-    <div className="space-y-2 text-xs sm:text-sm leading-relaxed text-slate-800">
+    <div className="space-y-2 text-xs sm:text-sm leading-relaxed text-slate-900">
       {lines.map((line, idx) => {
         const trimmed = line.trim();
         if (!trimmed) return <div key={idx} className="h-1" />;
@@ -432,7 +441,7 @@ function FormattedMessage({
           return (
             <h4
               key={idx}
-              className="font-bold text-sky-800 text-sm sm:text-base mt-3 border-b border-slate-100 pb-1"
+              className="font-bold text-sky-900 text-sm sm:text-base mt-3 border-b border-slate-100 pb-1"
             >
               {renderInline(trimmed.slice(4), sources, onSelectSource)}
             </h4>
@@ -448,101 +457,91 @@ function FormattedMessage({
             </h3>
           );
         }
+        if (trimmed.startsWith("# ")) {
+          return (
+            <h2
+              key={idx}
+              className="font-extrabold text-slate-900 text-lg mt-4 border-b border-slate-200 pb-1"
+            >
+              {renderInline(trimmed.slice(2), sources, onSelectSource)}
+            </h2>
+          );
+        }
 
+        // Bullet point
         if (trimmed.startsWith("- ") || trimmed.startsWith("* ")) {
           return (
             <div key={idx} className="flex items-start gap-2 pl-2">
-              <span className="h-1.5 w-1.5 rounded-full bg-sky-600 mt-2 shrink-0" />
-              <span>{renderInline(trimmed.slice(2), sources, onSelectSource)}</span>
+              <span className="h-1.5 w-1.5 rounded-full bg-sky-700 mt-2 shrink-0" />
+              <div className="flex-1">
+                {renderInline(trimmed.slice(2), sources, onSelectSource)}
+              </div>
             </div>
           );
         }
 
-        const numMatch = trimmed.match(/^(\d+)\.\s+(.*)$/);
+        // Numbered list item
+        const numMatch = trimmed.match(/^(\d+)\.\s+(.*)/);
         if (numMatch) {
           return (
             <div key={idx} className="flex items-start gap-2 pl-2">
-              <span className="font-bold text-sky-700 shrink-0 text-xs">
+              <span className="font-bold text-sky-800 text-xs mt-0.5 shrink-0 min-w-[14px]">
                 {numMatch[1]}.
               </span>
-              <span>{renderInline(numMatch[2], sources, onSelectSource)}</span>
+              <div className="flex-1">
+                {renderInline(numMatch[2], sources, onSelectSource)}
+              </div>
             </div>
           );
         }
 
-        return <p key={idx}>{renderInline(trimmed, sources, onSelectSource)}</p>;
+        return (
+          <p key={idx}>
+            {renderInline(trimmed, sources, onSelectSource)}
+          </p>
+        );
       })}
     </div>
   );
 }
 
 function renderInline(
-  text: string,
-  sources: SourceCitation[] = [],
+  str: string,
+  sources: SourceCitation[],
   onSelectSource?: (src: SourceCitation) => void
-): React.ReactNode[] {
-  // Regex matches:
-  // 1. **bold**
-  // 2. `code`
-  // 3. [Source 1, Source 2] or [Source 1] or [Ref 1]
-  const pattern = /(\*\*.*?\*\*|`.*?`|\[(?:Source|Ref)\s*\d+(?:,\s*(?:Source|Ref)?\s*\d+)*\])/gi;
-  const parts = text.split(pattern);
+): React.ReactNode {
+  // Regex to match citation tags like [Ref 1], [Ref #1], [Source 1], [1]
+  const pattern = /\[(?:Ref\s*#?|Source\s*#?|Citation\s*#?)?(\d+)\]/gi;
+  const parts: React.ReactNode[] = [];
+  let lastIndex = 0;
+  let match: RegExpExecArray | null;
 
-  return parts.map((part, i) => {
-    if (!part) return null;
-
-    if (part.startsWith("**") && part.endsWith("**")) {
-      return (
-        <strong key={i} className="font-bold text-slate-950">
-          {part.slice(2, -2)}
-        </strong>
-      );
-    }
-    if (part.startsWith("`") && part.endsWith("`")) {
-      return (
-        <code
-          key={i}
-          className="rounded bg-slate-100 px-1 py-0.5 font-mono text-[11px] text-sky-800 border border-slate-200"
-        >
-          {part.slice(1, -1)}
-        </code>
-      );
+  while ((match = pattern.exec(str)) !== null) {
+    if (match.index > lastIndex) {
+      parts.push(str.substring(lastIndex, match.index));
     }
 
-    // Check if citation tag like [Source 1, Source 2]
-    const citationMatch = part.match(/^\[(?:Source|Ref)\s*(\d+(?:,\s*(?:Source|Ref)?\s*\d+)*)\]$/i);
-    if (citationMatch) {
-      const nums = part.match(/\d+/g) || [];
-      return (
-        <span key={i} className="inline-flex items-center gap-1 mx-0.5 align-baseline">
-          {nums.map((numStr, nIdx) => {
-            const srcNum = parseInt(numStr, 10);
-            const matchedSource = sources.find((s) => s.id === srcNum);
-            return (
-              <button
-                key={nIdx}
-                type="button"
-                onClick={() => {
-                  if (matchedSource && onSelectSource) {
-                    onSelectSource(matchedSource);
-                  }
-                }}
-                className="inline-flex items-center gap-0.5 px-1.5 py-0.2 rounded-md bg-sky-50 text-sky-700 hover:bg-sky-100 hover:text-sky-900 border border-sky-200 text-[10px] font-bold transition shadow-2xs cursor-pointer group"
-                title={
-                  matchedSource
-                    ? `Click to view citation: ${matchedSource.document} (p. ${matchedSource.page})`
-                    : `Citation #${srcNum}`
-                }
-              >
-                <BookOpen className="h-2.5 w-2.5 text-sky-500 group-hover:text-sky-700" />
-                <span>Ref {srcNum}</span>
-              </button>
-            );
-          })}
-        </span>
-      );
-    }
+    const citationNum = parseInt(match[1], 10);
+    const matchedSource = sources.find((s) => s.id === citationNum);
 
-    return <span key={i}>{part}</span>;
-  });
+    parts.push(
+      <button
+        key={`cite-${match.index}`}
+        type="button"
+        onClick={() => matchedSource && onSelectSource && onSelectSource(matchedSource)}
+        className="inline-flex items-center gap-0.5 rounded bg-sky-100 hover:bg-sky-200 text-sky-800 font-bold px-1.5 py-0.2 text-[10px] mx-1 border border-sky-300 transition cursor-pointer"
+        title={matchedSource ? `${matchedSource.document} (p. ${matchedSource.page})` : `Reference #${citationNum}`}
+      >
+        <span>Ref #{citationNum}</span>
+      </button>
+    );
+
+    lastIndex = match.index + match[0].length;
+  }
+
+  if (lastIndex < str.length) {
+    parts.push(str.substring(lastIndex));
+  }
+
+  return <>{parts}</>;
 }

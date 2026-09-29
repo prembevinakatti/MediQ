@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, { createContext, useContext, useEffect, useState, useCallback } from "react";
 import { api, User } from "./api";
 
 interface AuthContextType {
@@ -15,37 +15,60 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
-  const [token, setToken] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [token, setToken] = useState<string | null>(() => {
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("mediq_token");
+    }
+    return null;
+  });
+
+  const [user, setUser] = useState<User | null>(() => {
+    if (typeof window !== "undefined") {
+      const savedUser = localStorage.getItem("mediq_user");
+      if (savedUser) {
+        try {
+          return JSON.parse(savedUser) as User;
+        } catch {
+          return null;
+        }
+      }
+    }
+    return null;
+  });
+
+  const [isLoading, setIsLoading] = useState<boolean>(() => {
+    if (typeof window !== "undefined") {
+      return Boolean(localStorage.getItem("mediq_token"));
+    }
+    return false;
+  });
+
+  const logout = useCallback(() => {
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("mediq_token");
+      localStorage.removeItem("mediq_user");
+    }
+    setToken(null);
+    setUser(null);
+  }, []);
 
   useEffect(() => {
     const savedToken = localStorage.getItem("mediq_token");
-    const savedUser = localStorage.getItem("mediq_user");
-
-    if (savedToken && savedUser) {
-      try {
-        setToken(savedToken);
-        setUser(JSON.parse(savedUser));
-        // Verify token with backend
-        api
-          .getMe()
-          .then((freshUser) => {
-            setUser(freshUser);
-            localStorage.setItem("mediq_user", JSON.stringify(freshUser));
-          })
-          .catch(() => {
-            // Token expired or invalid
-            logout();
-          })
-          .finally(() => setIsLoading(false));
-        return;
-      } catch {
-        logout();
-      }
+    if (savedToken) {
+      api
+        .getMe()
+        .then((freshUser) => {
+          setUser(freshUser);
+          localStorage.setItem("mediq_user", JSON.stringify(freshUser));
+        })
+        .catch(() => {
+          logout();
+        })
+        .finally(() => {
+          setIsLoading(false);
+        });
     }
-    setIsLoading(false);
-  }, []);
+  }, [logout]);
 
   const login = async (email: string, password: string) => {
     const res = await api.login(email, password);
@@ -71,13 +94,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     localStorage.setItem("mediq_user", JSON.stringify(userInfo));
     setToken(res.access_token);
     setUser(userInfo);
-  };
-
-  const logout = () => {
-    localStorage.removeItem("mediq_token");
-    localStorage.removeItem("mediq_user");
-    setToken(null);
-    setUser(null);
   };
 
   return (

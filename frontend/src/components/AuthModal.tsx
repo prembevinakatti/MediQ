@@ -2,7 +2,16 @@
 
 import React, { useState } from "react";
 import { useAuth } from "@/lib/auth-context";
-import { Stethoscope, Lock, Mail, User as UserIcon, ArrowRight, AlertCircle, X, ShieldCheck, Sparkles } from "lucide-react";
+import {
+  Stethoscope,
+  Lock,
+  Mail,
+  User as UserIcon,
+  ArrowRight,
+  AlertCircle,
+  X,
+  ShieldCheck,
+} from "lucide-react";
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -28,27 +37,45 @@ export function AuthModal({ isOpen, onClose, canDismiss = false }: AuthModalProp
 
     try {
       if (isRegister) {
-        if (!name.trim()) throw new Error("Please enter your name & title");
+        if (!name.trim()) throw new Error("Please enter your practitioner name & credential");
         await register(name.trim(), email.trim(), password);
       } else {
         await login(email.trim(), password);
       }
       if (onClose) onClose();
-    } catch (err: any) {
-      setError(err.message || "Authentication failed");
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Authentication failed");
     } finally {
       setLoading(false);
     }
   };
 
-  const handleDemoFill = () => {
-    setEmail("dr.smith@mediq.ai");
-    setPassword("MedicalAI2026!");
-    if (isRegister) setName("Dr. Julian Smith, MD");
+  const handleQuickDemoAccess = async () => {
+    setError(null);
+    setLoading(true);
+    const demoEmail = "dr.smith@mediq.hospital";
+    const demoPass = "ClinicalPass2026!";
+    const demoName = "Dr. Julian Smith, MD";
+
+    try {
+      // Try login first
+      await login(demoEmail, demoPass);
+      if (onClose) onClose();
+    } catch {
+      // If user doesn't exist yet, auto-register
+      try {
+        await register(demoName, demoEmail, demoPass);
+        if (onClose) onClose();
+      } catch (err: unknown) {
+        setError(err instanceof Error ? err.message : "Failed to initialize demo session");
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-xs">
       <div className="relative w-full max-w-md overflow-hidden rounded-2xl border border-slate-200 bg-white p-7 shadow-2xl">
         {canDismiss && onClose && (
           <button
@@ -59,23 +86,52 @@ export function AuthModal({ isOpen, onClose, canDismiss = false }: AuthModalProp
           </button>
         )}
 
-        {/* Header */}
+        {/* Clinical Header */}
         <div className="flex flex-col items-center text-center mb-6">
-          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-sky-600 text-white shadow-xs mb-3">
+          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-sky-700 text-white shadow-xs mb-3">
             <Stethoscope className="h-6 w-6" />
           </div>
           <h2 className="text-xl font-bold tracking-tight text-slate-900 flex items-center gap-1.5">
-            MediQ <span className="text-xs px-2 py-0.5 rounded-md bg-sky-50 text-sky-700 border border-sky-200">Clinical Portal</span>
+            Medi<span className="text-sky-700">Q</span>
+            <span className="text-xs px-2 py-0.5 rounded-md bg-sky-50 text-sky-800 border border-sky-200 font-semibold">
+              Practitioner Portal
+            </span>
           </h2>
           <p className="mt-1 text-xs text-slate-500">
             {isRegister
-              ? "Register your clinical practitioner account"
-              : "Sign in to access your hospital guidelines and consult AI"}
+              ? "Register your clinical practitioner credentials"
+              : "Sign in to access institutional practice guidelines and clinical consultation"}
           </p>
         </div>
 
+        {/* Quick Demo Access One-Click Button */}
+        <button
+          type="button"
+          onClick={handleQuickDemoAccess}
+          disabled={loading}
+          className="mb-4 w-full flex items-center justify-between rounded-xl border border-sky-200 bg-sky-50/80 px-4 py-2.5 text-left text-xs text-sky-900 hover:bg-sky-100 transition shadow-2xs font-medium"
+        >
+          <div className="flex items-center gap-2">
+            <ShieldCheck className="h-4 w-4 text-sky-700 shrink-0" />
+            <div>
+              <p className="font-bold text-sky-900">Instant Clinical Demo Access</p>
+              <p className="text-[11px] text-sky-700">Sign in as Dr. Julian Smith, MD</p>
+            </div>
+          </div>
+          <ArrowRight className="h-3.5 w-3.5 text-sky-700" />
+        </button>
+
+        <div className="relative my-4">
+          <div className="absolute inset-0 flex items-center">
+            <div className="w-full border-t border-slate-200" />
+          </div>
+          <div className="relative flex justify-center text-[10px] uppercase font-bold text-slate-400">
+            <span className="bg-white px-2">Or enter credentials</span>
+          </div>
+        </div>
+
         {/* Tab Switcher */}
-        <div className="grid grid-cols-2 rounded-xl bg-slate-100 p-1 mb-5 border border-slate-200/80">
+        <div className="grid grid-cols-2 rounded-xl bg-slate-100 p-1 mb-5 border border-slate-200">
           <button
             type="button"
             onClick={() => {
@@ -102,7 +158,7 @@ export function AuthModal({ isOpen, onClose, canDismiss = false }: AuthModalProp
                 : "text-slate-500 hover:text-slate-900"
             }`}
           >
-            Create Account
+            Register Practitioner
           </button>
         </div>
 
@@ -129,7 +185,7 @@ export function AuthModal({ isOpen, onClose, canDismiss = false }: AuthModalProp
                   placeholder="Dr. Julian Smith, MD"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="w-full rounded-xl border border-slate-300 bg-white pl-9 pr-3 py-2 text-xs text-slate-900 placeholder-slate-400 focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500 transition"
+                  className="w-full rounded-xl border border-slate-300 bg-white pl-9 pr-3 py-2 text-xs text-slate-900 placeholder-slate-400 focus:border-sky-600 focus:outline-none focus:ring-1 focus:ring-sky-600 transition"
                 />
               </div>
             </div>
@@ -144,10 +200,10 @@ export function AuthModal({ isOpen, onClose, canDismiss = false }: AuthModalProp
               <input
                 type="email"
                 required
-                placeholder="doctor@hospital.org"
+                placeholder="physician@hospital.org"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full rounded-xl border border-slate-300 bg-white pl-9 pr-3 py-2 text-xs text-slate-900 placeholder-slate-400 focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500 transition"
+                className="w-full rounded-xl border border-slate-300 bg-white pl-9 pr-3 py-2 text-xs text-slate-900 placeholder-slate-400 focus:border-sky-600 focus:outline-none focus:ring-1 focus:ring-sky-600 transition"
               />
             </div>
           </div>
@@ -164,7 +220,7 @@ export function AuthModal({ isOpen, onClose, canDismiss = false }: AuthModalProp
                 placeholder="••••••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full rounded-xl border border-slate-300 bg-white pl-9 pr-3 py-2 text-xs text-slate-900 placeholder-slate-400 focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500 transition"
+                className="w-full rounded-xl border border-slate-300 bg-white pl-9 pr-3 py-2 text-xs text-slate-900 placeholder-slate-400 focus:border-sky-600 focus:outline-none focus:ring-1 focus:ring-sky-600 transition"
               />
             </div>
           </div>
@@ -172,32 +228,22 @@ export function AuthModal({ isOpen, onClose, canDismiss = false }: AuthModalProp
           <button
             type="submit"
             disabled={loading}
-            className="w-full mt-2 flex items-center justify-center gap-2 rounded-xl bg-sky-600 py-2.5 text-xs font-bold text-white hover:bg-sky-700 active:scale-[0.99] transition disabled:opacity-50 shadow-xs"
+            className="w-full flex items-center justify-center gap-2 rounded-xl bg-sky-700 py-2.5 text-xs font-bold text-white shadow-xs hover:bg-sky-800 active:scale-[0.99] transition disabled:opacity-40"
           >
             {loading ? (
-              <span className="flex items-center gap-2">
-                <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                Validating Credentials...
-              </span>
+              <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
             ) : (
               <>
-                <span>{isRegister ? "Register Clinical Account" : "Sign In to Workspace"}</span>
-                <ArrowRight className="h-4 w-4" />
+                <span>{isRegister ? "Register Practitioner Account" : "Access Clinical Workspace"}</span>
+                <ArrowRight className="h-3.5 w-3.5" />
               </>
             )}
           </button>
         </form>
 
-        {/* Demo Fast-Fill */}
-        <div className="mt-5 pt-3.5 border-t border-slate-100 flex items-center justify-between">
-          <span className="text-[11px] text-slate-400">Quick Testing:</span>
-          <button
-            type="button"
-            onClick={handleDemoFill}
-            className="text-xs font-semibold text-sky-600 hover:text-sky-700 transition"
-          >
-            Fill Demo Credentials
-          </button>
+        <div className="mt-5 text-center text-[10px] text-slate-400 flex items-center justify-center gap-1">
+          <ShieldCheck className="h-3 w-3 text-emerald-600" />
+          <span>Encrypted Clinical Access • Institutional Protocol Isolation</span>
         </div>
       </div>
     </div>

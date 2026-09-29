@@ -108,7 +108,7 @@ export const api = {
   },
 
   // Documents
-  async uploadDocument(file: File): Promise<{ message: string; data: any }> {
+  async uploadDocument(file: File): Promise<{ message: string; data: Record<string, unknown> }> {
     const formData = new FormData();
     formData.append("file", file);
 

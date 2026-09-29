@@ -13,9 +13,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "MediQ — Next-Gen Clinical Intelligence & Evidence Copilot",
+  title: "MediQ — Clinical Decision Support & Evidence-Based Copilot",
   description:
-    "AI-powered medical knowledge assistant with Pinecone vector retrieval, multi-modal clinical reasoning, and verified source citations.",
+    "Institutional medical literature retrieval, point-of-care clinical guidelines, drug formulary guidance, and peer-reviewed source citations for healthcare practitioners.",
 };
 
 export default function RootLayout({

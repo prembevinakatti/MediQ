@@ -11,9 +11,9 @@ import {
   Layers,
   Calendar,
   ArrowRight,
-  Database,
-  FileCode,
+  ShieldCheck,
   FolderOpen,
+  BookOpen,
 } from "lucide-react";
 
 interface DocumentManagerProps {
@@ -68,7 +68,7 @@ export function DocumentManager({
     setUploadSuccess(null);
 
     if (!file.name.toLowerCase().endsWith(".pdf")) {
-      setUploadError("Only PDF documents are supported for clinical indexing.");
+      setUploadError("Only PDF documents are supported for clinical literature indexing.");
       return;
     }
 
@@ -76,11 +76,11 @@ export function DocumentManager({
     try {
       const res = await api.uploadDocument(file);
       setUploadSuccess(
-        `Successfully indexed "${file.name}" into Pinecone (${res.data?.chunks || "multiple"} vector chunks).`
+        `Successfully indexed "${file.name}" into clinical library (${res.data?.chunks || "multiple"} reference sections).`
       );
       onRefreshDocs();
-    } catch (err: any) {
-      setUploadError(err.message || "Failed to process document");
+    } catch (err: unknown) {
+      setUploadError(err instanceof Error ? err.message : "Failed to process clinical document");
     } finally {
       setUploading(false);
       if (inputRef.current) inputRef.current.value = "";
@@ -108,17 +108,17 @@ export function DocumentManager({
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-5">
           <div>
             <h1 className="text-2xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
-              <FolderOpen className="h-6 w-6 text-sky-600" />
+              <FolderOpen className="h-6 w-6 text-sky-700" />
               Clinical Document & Formulary Library
             </h1>
             <p className="mt-1 text-xs sm:text-sm text-slate-500">
-              Manage hospital guidelines, medical textbooks, and clinical trial studies indexed in Pinecone.
+              Manage hospital practice guidelines, medical textbooks, formularies, and peer-reviewed studies.
             </p>
           </div>
 
           <button
             onClick={() => inputRef.current?.click()}
-            className="flex items-center justify-center gap-2 rounded-xl bg-sky-600 px-4 py-2.5 text-xs font-semibold text-white shadow-xs hover:bg-sky-700 active:scale-[0.99] transition"
+            className="flex items-center justify-center gap-2 rounded-xl bg-sky-700 px-4 py-2.5 text-xs font-semibold text-white shadow-xs hover:bg-sky-800 active:scale-[0.99] transition"
           >
             <UploadCloud className="h-4 w-4" />
             Upload Clinical PDF
@@ -129,7 +129,7 @@ export function DocumentManager({
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
           <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-2xs">
             <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
-              <FileText className="h-3.5 w-3.5 text-sky-600" /> Active Documents
+              <FileText className="h-3.5 w-3.5 text-sky-700" /> Active Literature
             </span>
             <p className="mt-2 text-2xl font-extrabold text-slate-900">
               {documents.length}
@@ -138,7 +138,7 @@ export function DocumentManager({
 
           <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-2xs">
             <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
-              <Layers className="h-3.5 w-3.5 text-teal-600" /> Vector Chunks
+              <Layers className="h-3.5 w-3.5 text-teal-700" /> Searchable Passages
             </span>
             <p className="mt-2 text-2xl font-extrabold text-teal-700">
               {totalChunks}
@@ -147,7 +147,7 @@ export function DocumentManager({
 
           <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-2xs">
             <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
-              <Calendar className="h-3.5 w-3.5 text-indigo-600" /> Total Pages
+              <Calendar className="h-3.5 w-3.5 text-indigo-700" /> Total Pages
             </span>
             <p className="mt-2 text-2xl font-extrabold text-indigo-700">
               {totalPages}
@@ -156,12 +156,13 @@ export function DocumentManager({
 
           <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-2xs">
             <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
-              <Database className="h-3.5 w-3.5 text-emerald-600" /> Vector Index
+              <ShieldCheck className="h-3.5 w-3.5 text-emerald-600" /> Evidence Status
             </span>
-            <p className="mt-2 text-xs font-bold text-slate-900">
-              768-Dim Cosine
+            <p className="mt-2 text-xs font-bold text-emerald-700 flex items-center gap-1">
+              <CheckCircle2 className="h-4 w-4" />
+              Verified & Searchable
             </p>
-            <p className="text-[10px] text-slate-500">Gemini Embedding-001</p>
+            <p className="text-[10px] text-slate-500">Ready for point-of-care queries</p>
           </div>
         </div>
 
@@ -174,8 +175,8 @@ export function DocumentManager({
           onClick={() => inputRef.current?.click()}
           className={`relative cursor-pointer rounded-2xl border-2 border-dashed p-8 sm:p-10 text-center transition-all bg-white ${
             dragActive
-              ? "border-sky-500 bg-sky-50/50 scale-[1.005]"
-              : "border-slate-300 hover:border-sky-400 hover:bg-slate-50/60"
+              ? "border-sky-600 bg-sky-50/50 scale-[1.005]"
+              : "border-slate-300 hover:border-sky-500 hover:bg-slate-50/60"
           }`}
         >
           <input
@@ -187,24 +188,24 @@ export function DocumentManager({
           />
 
           <div className="flex flex-col items-center">
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-sky-50 text-sky-600 border border-sky-100 mb-3 shadow-2xs">
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-sky-50 text-sky-700 border border-sky-100 mb-3 shadow-2xs">
               <UploadCloud className="h-6 w-6" />
             </div>
 
             <h3 className="text-base font-bold text-slate-900">
               {uploading
-                ? "Extracting Chunks & Vectorizing into Pinecone..."
-                : "Upload Medical Literature or Institutional Guidelines"}
+                ? "Extracting & Indexing Clinical Literature..."
+                : "Upload Medical Guidelines, Drug Formularies, or Protocols"}
             </h3>
 
             <p className="mt-1 text-xs text-slate-500 max-w-sm">
-              Drag and drop clinical PDF documents here. Text will be chunked, embedded via Gemini, and indexed into your Pinecone namespace.
+              Drag and drop clinical PDF documents here. Text is processed for immediate evidence retrieval and verified source citation mapping.
             </p>
 
             {uploading && (
               <div className="mt-4 flex items-center gap-2 rounded-lg bg-sky-50 px-4 py-2 text-xs text-sky-800 border border-sky-200 font-semibold">
-                <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-sky-600 border-t-transparent" />
-                Generating 768-dim embeddings and saving record...
+                <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-sky-700 border-t-transparent" />
+                Parsing document structure and generating clinical indices...
               </div>
             )}
           </div>
@@ -229,12 +230,12 @@ export function DocumentManager({
         <div className="space-y-3">
           <div className="flex items-center justify-between">
             <h2 className="text-xs font-bold uppercase tracking-wider text-slate-500 flex items-center gap-2">
-              <FileCheck className="h-4 w-4 text-sky-600" />
+              <FileCheck className="h-4 w-4 text-sky-700" />
               Indexed Medical Literature ({documents.length})
             </h2>
             <button
               onClick={onRefreshDocs}
-              className="text-xs font-semibold text-sky-600 hover:text-sky-700 hover:underline"
+              className="text-xs font-semibold text-sky-700 hover:text-sky-800 hover:underline"
             >
               Refresh List
             </button>
@@ -251,12 +252,12 @@ export function DocumentManager({
             </div>
           ) : documents.length === 0 ? (
             <div className="rounded-2xl border border-slate-200 bg-white p-10 text-center shadow-2xs">
-              <FileText className="h-10 w-10 text-slate-300 mx-auto mb-2" />
+              <BookOpen className="h-10 w-10 text-slate-300 mx-auto mb-2" />
               <p className="text-sm font-bold text-slate-800">
-                No documents uploaded yet
+                No institutional documents indexed yet
               </p>
               <p className="text-xs text-slate-500 mt-1 max-w-sm mx-auto">
-                Upload your first medical guideline or pharmacology guide to start asking questions with citations.
+                Upload clinical guidelines, pharmacological compendiums, or hospital care pathways to begin citation-grounded consultations.
               </p>
             </div>
           ) : (
@@ -269,37 +270,37 @@ export function DocumentManager({
                   <div>
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex items-center gap-3">
-                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-sky-50 text-sky-600 border border-sky-100">
+                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-sky-50 text-sky-700 border border-sky-100">
                           <FileText className="h-5 w-5" />
                         </div>
                         <div>
                           <h4
-                            className="text-sm font-bold text-slate-900 group-hover:text-sky-700 transition truncate max-w-[210px]"
+                            className="text-sm font-bold text-slate-900 group-hover:text-sky-800 transition truncate max-w-[210px]"
                             title={doc.document_name}
                           >
                             {doc.document_name}
                           </h4>
                           <span className="text-[11px] text-slate-500">
-                            Indexed on {formatDate(doc.created_at)}
+                            Added {formatDate(doc.created_at)}
                           </span>
                         </div>
                       </div>
 
-                      <span className="rounded-md bg-emerald-50 px-2 py-0.5 text-[10px] font-bold text-emerald-700 border border-emerald-200">
-                        Pinecone Live
+                      <span className="rounded-md bg-emerald-50 px-2 py-0.5 text-[10px] font-bold text-emerald-800 border border-emerald-200">
+                        Active Reference
                       </span>
                     </div>
 
                     <div className="mt-4 grid grid-cols-2 gap-2 text-xs">
                       <div className="rounded-lg bg-slate-50 p-2 border border-slate-200/60">
                         <span className="text-[10px] text-slate-500 uppercase font-semibold">
-                          Pages
+                          Total Pages
                         </span>
                         <p className="font-bold text-slate-900">{doc.pages}</p>
                       </div>
                       <div className="rounded-lg bg-slate-50 p-2 border border-slate-200/60">
                         <span className="text-[10px] text-slate-500 uppercase font-semibold">
-                          Pinecone Chunks
+                          Indexed Sections
                         </span>
                         <p className="font-bold text-teal-700">{doc.chunks}</p>
                       </div>
@@ -308,14 +309,14 @@ export function DocumentManager({
 
                   <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
                     <span className="text-[11px] text-slate-400 font-medium">
-                      Ready for RAG Query
+                      Verified for Clinical Retrieval
                     </span>
 
                     <button
                       onClick={() => onAskAboutDoc(doc.document_name)}
-                      className="flex items-center gap-1 text-xs font-bold text-sky-600 hover:text-sky-700 transition"
+                      className="flex items-center gap-1 text-xs font-bold text-sky-700 hover:text-sky-800 transition"
                     >
-                      <span>Consult on this document</span>
+                      <span>Consult on this guideline</span>
                       <ArrowRight className="h-3.5 w-3.5" />
                     </button>
                   </div>
