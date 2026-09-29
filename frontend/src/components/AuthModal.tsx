@@ -104,31 +104,7 @@ export function AuthModal({ isOpen, onClose, canDismiss = false }: AuthModalProp
           </p>
         </div>
 
-        {/* Quick Demo Access One-Click Button */}
-        <button
-          type="button"
-          onClick={handleQuickDemoAccess}
-          disabled={loading}
-          className="mb-4 w-full flex items-center justify-between rounded-xl border border-sky-200 bg-sky-50/80 px-4 py-2.5 text-left text-xs text-sky-900 hover:bg-sky-100 transition shadow-2xs font-medium"
-        >
-          <div className="flex items-center gap-2">
-            <ShieldCheck className="h-4 w-4 text-sky-700 shrink-0" />
-            <div>
-              <p className="font-bold text-sky-900">Instant Clinical Demo Access</p>
-              <p className="text-[11px] text-sky-700">Sign in as Dr. Julian Smith, MD</p>
-            </div>
-          </div>
-          <ArrowRight className="h-3.5 w-3.5 text-sky-700" />
-        </button>
-
-        <div className="relative my-4">
-          <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-slate-200" />
-          </div>
-          <div className="relative flex justify-center text-[10px] uppercase font-bold text-slate-400">
-            <span className="bg-white px-2">Or enter credentials</span>
-          </div>
-        </div>
+  
 
         {/* Tab Switcher */}
         <div className="grid grid-cols-2 rounded-xl bg-slate-100 p-1 mb-5 border border-slate-200">
