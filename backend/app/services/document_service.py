@@ -1,5 +1,5 @@
 from pathlib import Path
-
+from uuid import uuid4
 from app.services.pdf_service import extract_pages
 from app.services.chunk_service import create_chunks
 from app.services.embedding_service import (
@@ -21,6 +21,8 @@ def process_document(
 
     document_name = Path(pdf_path).name
 
+    document_id = str(uuid4())
+
 
     for chunk in chunks:
 
@@ -33,18 +35,21 @@ def process_document(
 
         chunk["document_name"] = document_name
         chunk["user_id"] = user_id
+        chunk["document_id"] = document_id
 
 
     store_chunks(chunks)
     
     document_record = save_document(
         user_id=user_id,
+        document_id=document_id,
         document_name=document_name,
         pages=len(pages),
         chunks=len(chunks),
     )
 
     return {
+        "document_id": document_id,
         "document_name": document_name,
         "pages": len(pages),
         "chunks": len(chunks),

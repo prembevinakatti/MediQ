@@ -7,12 +7,14 @@ from app.db.mongodb import documents_collection
 
 def save_document(
     user_id: str,
+    document_id: str,
     document_name: str,
     pages: int,
     chunks: int,
 ):
     document = {
         "user_id": ObjectId(user_id),
+        "document_id": document_id,
         "document_name": document_name,
         "pages": pages,
         "chunks": chunks,
@@ -23,6 +25,7 @@ def save_document(
 
     return {
         "id": str(result.inserted_id),
+        "document_id": document_id,
         "document_name": document_name,
         "pages": pages,
         "chunks": chunks,

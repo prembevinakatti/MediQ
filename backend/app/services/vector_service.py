@@ -1,4 +1,4 @@
-from pinecone import Pinecone
+from pinecone import Pinecone, ServerlessSpec
 
 from app.core.config import settings
 
@@ -20,6 +20,16 @@ def clear_documents():
     }
 
 def get_index():
+    if not pc.has_index(settings.PINECONE_INDEX_NAME):
+        pc.create_index(
+            name=settings.PINECONE_INDEX_NAME,
+            dimension=settings.GEMINI_EMBEDDING_DIMENSION,
+            metric="cosine",
+            spec=ServerlessSpec(
+                cloud="aws",
+                region="us-east-1",
+            ),
+        )
     return pc.Index(
         settings.PINECONE_INDEX_NAME
     )
@@ -33,13 +43,14 @@ def store_chunks(chunks: list[dict]):
         records.append(
             {
                 "id": f"{chunk['document_name']}_{chunk['chunk_id']}",
-                "user_id": chunk["user_id"],
                 "values": chunk["embedding"],
                 "metadata": {
+                    "user_id": chunk["user_id"],
                     "text": chunk["text"],
                     "page_number": chunk["page_number"],
                     "section": chunk.get("section", "General"),
                     "document_name": chunk["document_name"],
+                    "document_id": chunk["document_id"],
                 },
             }
         )
