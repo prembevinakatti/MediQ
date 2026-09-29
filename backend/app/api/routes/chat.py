@@ -15,6 +15,8 @@ from app.services.chat_db_service import (
     format_conversation_history,
     get_user_conversation,
     get_user_conversations,
+    update_conversation_title,
+    extract_clinical_title,
 )
 from app.services.query_service import rewrite_question
 
@@ -55,10 +57,10 @@ def chat(
             conversation_id = request.conversation_id
 
         else:
-
             conversation_id = create_conversation(
-                user_id=user_id
+                user_id=user_id,
             )
+            conversation = None
 
         # --------------------------------
         # Get previous messages
@@ -78,6 +80,16 @@ def chat(
             question=request.question,
             conversation_history=history,
         )
+
+        # --------------------------------
+        # Update Title if needed
+        # --------------------------------
+        title = conversation.get("title") if conversation else None
+        if not title or title.lower() in ["new conversation", "new consultation", "clinical consultation", "hello", "hi", "hey"]:
+            candidate_title = extract_clinical_title(search_query or request.question)
+            if candidate_title.lower() not in ["clinical consultation", "hello", "hi", "hey"]:
+                title = candidate_title
+                update_conversation_title(conversation_id, title)
 
         # --------------------------------
         # RAG
@@ -109,6 +121,7 @@ def chat(
 
         return {
             "conversation_id": conversation_id,
+            "title": title,
             "question": request.question,
             "search_query": search_query,
             "answer": result["answer"],
@@ -147,4 +160,37 @@ def get_chat_history(
             "updated_at": conversation["updated_at"],
         }
         for conversation in conversations
+    ]
+
+
+@router.get("/{conversation_id}/messages")
+def get_messages(
+    conversation_id: str,
+    current_user=Depends(get_current_user),
+):
+    user_id = str(current_user["_id"])
+    conversation = get_user_conversation(
+        conversation_id=conversation_id,
+        user_id=user_id,
+    )
+    if not conversation:
+        raise HTTPException(
+            status_code=404,
+            detail="Conversation not found",
+        )
+
+    messages = get_conversation_messages(
+        conversation_id=conversation_id,
+        limit=100,
+    )
+
+    return [
+        {
+            "id": str(msg["_id"]),
+            "role": msg["role"],
+            "content": msg["content"],
+            "sources": msg.get("sources", []),
+            "created_at": msg.get("created_at"),
+        }
+        for msg in messages
     ]
